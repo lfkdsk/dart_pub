@@ -125,6 +125,7 @@ class Pubspec {
   }
 
   String _name;
+  String _flutterVersion;
 
   /// The package's version.
   Version get version {
@@ -529,6 +530,7 @@ class Pubspec {
         _includeDefaultSdkConstraint = includeDefaultSdkConstraint ?? true {
     // If [expectedName] is passed, ensure that the actual 'name' field exists
     // and matches the expectation.
+    _flutterVersion = fields['flutter_version'];
     if (expectedName == null) return;
     if (name == expectedName) return;
 
@@ -619,6 +621,10 @@ class Pubspec {
       YamlNode descriptionNode;
       String sourceName;
 
+      if (spec is Map && _flutterVersion != null && spec.containsKey(_flutterVersion)) {
+          specNode = spec.nodes[_flutterVersion];
+          spec = specNode?.value;
+      }
       var versionConstraint = VersionRange();
       var features = const <String, FeatureDependency>{};
       if (spec == null) {
@@ -695,7 +701,6 @@ class Pubspec {
     if (node.value is! String) {
       _error('A version constraint must be a string.', node.span);
     }
-
     return _wrapFormatException('version constraint', node.span, () {
       var constraint = VersionConstraint.parse(node.value);
       if (defaultUpperBoundConstraint != null &&
