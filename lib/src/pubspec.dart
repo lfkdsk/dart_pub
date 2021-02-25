@@ -127,6 +127,10 @@ class Pubspec {
   String _name;
   String _flutterVersion;
 
+  set flutterVersion(String value) {
+    _flutterVersion = value;
+  }
+
   /// The package's version.
   Version get version {
     if (_version != null) return _version;
@@ -530,7 +534,7 @@ class Pubspec {
         _includeDefaultSdkConstraint = includeDefaultSdkConstraint ?? true {
     // If [expectedName] is passed, ensure that the actual 'name' field exists
     // and matches the expectation.
-    _flutterVersion = fields['flutter_version'];
+    _flutterVersion ??= fields['flutter_version'];
     if (expectedName == null) return;
     if (name == expectedName) return;
 

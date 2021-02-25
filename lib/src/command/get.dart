@@ -34,6 +34,11 @@ class GetCommand extends PubCommand {
         help: 'Precompile executables in immediate dependencies.');
 
     argParser.addFlag('packages-dir', hide: true);
+
+    argParser.addOption(
+      'version-name',
+      help: 'Flutter version condition token eq: bd_1_12_13',
+    );
   }
 
   @override
@@ -42,7 +47,11 @@ class GetCommand extends PubCommand {
       log.warning(log.yellow(
           'The --packages-dir flag is no longer used and does nothing.'));
     }
-    return entrypoint.acquireDependencies(SolveType.GET,
-        dryRun: argResults['dry-run'], precompile: argResults['precompile']);
+    return entrypoint.acquireDependencies(
+      SolveType.GET,
+      dryRun: argResults['dry-run'],
+      precompile: argResults['precompile'],
+      versionToken: argResults['version-name'],
+    );
   }
 }

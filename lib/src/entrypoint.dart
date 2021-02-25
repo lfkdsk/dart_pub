@@ -223,7 +223,9 @@ class Entrypoint {
   Future acquireDependencies(SolveType type,
       {List<String> useLatest,
       bool dryRun = false,
-      bool precompile = false}) async {
+      bool precompile = false,
+      String versionToken}) async {
+    root?.pubspec?.flutterVersion = versionToken;
     var result = await log.progress(
       'Resolving dependencies',
       () => resolveVersions(
