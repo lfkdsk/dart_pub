@@ -35,9 +35,9 @@ class GetCommand extends PubCommand {
 
     argParser.addFlag('packages-dir', hide: true);
 
-    argParser.addOption(
-      'version-name',
-      help: 'Flutter version condition token eq: bd_1_12_13',
+    argParser.addMultiOption(
+      'conditions',
+      help: 'flutter multi-conditions',
     );
   }
 
@@ -51,7 +51,7 @@ class GetCommand extends PubCommand {
       SolveType.GET,
       dryRun: argResults['dry-run'],
       precompile: argResults['precompile'],
-      versionToken: argResults['version-name'],
+      conditions: argResults['conditions'],
     );
   }
 }

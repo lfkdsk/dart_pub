@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:collection/collection.dart' hide mapMap;
@@ -125,10 +126,10 @@ class Pubspec {
   }
 
   String _name;
-  String _flutterVersion;
+  List<String> _conditions;
 
-  set flutterVersion(String value) {
-    _flutterVersion = value;
+  set conditions(List<String> value) {
+    _conditions = value;
   }
 
   /// The package's version.
@@ -534,7 +535,6 @@ class Pubspec {
         _includeDefaultSdkConstraint = includeDefaultSdkConstraint ?? true {
     // If [expectedName] is passed, ensure that the actual 'name' field exists
     // and matches the expectation.
-    _flutterVersion ??= fields['flutter_version'];
     if (expectedName == null) return;
     if (name == expectedName) return;
 
@@ -615,6 +615,19 @@ class Pubspec {
       _error('A dependency name must be a string.', nonStringNode.span);
     }
 
+    final importedConditions = LinkedHashMap<String, String>();
+    final YamlMap conditions = fields['conditions'];
+    if (conditions != null && conditions is YamlMap) {
+      for (String key in conditions.keys) {
+        importedConditions[key] = conditions[key].toString();
+      }
+    }
+    (_conditions ?? []).forEach((entity) {
+      final con = entity.split('=');
+      assert(con != null && con.length == 2);
+      importedConditions[con[0]] = con[1];
+    });
+
     map.nodes.forEach((nameNode, specNode) {
       var name = nameNode.value;
       var spec = specNode.value;
@@ -625,10 +638,16 @@ class Pubspec {
       YamlNode descriptionNode;
       String sourceName;
 
-      if (spec is Map && _flutterVersion != null && spec.containsKey(_flutterVersion)) {
-          specNode = spec.nodes[_flutterVersion];
-          spec = specNode?.value;
+      if (spec is Map && importedConditions.isNotEmpty) {
+        for (final entry in importedConditions.entries) {
+          if (spec.containsKey(entry.key) && entry.value == 'true') {
+            specNode = spec.nodes[entry.key];
+            spec = specNode?.value;
+            break;
+          }
+        }
       }
+
       var versionConstraint = VersionRange();
       var features = const <String, FeatureDependency>{};
       if (spec == null) {
